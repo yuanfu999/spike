@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyf.spike.mapper.SkGoodsMapper">
+    <resultMap id="BaseResultMap" type="com.cyf.spike.entity.SkGoods">
+        <!--@mbg.generated generated on Tue Aug 25 16:13:55 CST 2020.-->
+        <!--@Table sk_goods-->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="goods_name" jdbcType="VARCHAR" property="goodsName"/>
+        <result column="goods_title" jdbcType="VARCHAR" property="goodsTitle"/>
+        <result column="goods_img" jdbcType="VARCHAR" property="goodsImg"/>
+        <result column="goods_detail" jdbcType="LONGVARCHAR" property="goodsDetail"/>
+        <result column="goods_price" jdbcType="DECIMAL" property="goodsPrice"/>
+        <result column="goods_stock" jdbcType="INTEGER" property="goodsStock"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated generated on Tue Aug 25 16:13:55 CST 2020.-->
+        id, goods_name, goods_title, goods_img, goods_detail, goods_price, goods_stock
+    </sql>
+    <select id="findGoodsVoList" resultType="com.cyf.spike.vo.GoodsVo">
+        select g.*, gs.seckill_price, gs.stock_count, gs.start_date, gs.end_date, gs.version
+        from sk_goods_seckill gs
+                 left join sk_goods g
+                           on g.id = gs.goods_id
+        order by gs.start_date asc
+    </select>
+    <select id="findGoodsVoById" resultType="com.cyf.spike.vo.GoodsVo">
+        select g.*, gs.seckill_price, gs.stock_count, gs.start_date, gs.end_date, gs.version
+        from sk_goods_seckill gs
+                 left join sk_goods g
+                           on g.id = gs.goods_id
+        where g.id = #{goodsId}
+    </select>
+    <select id="getVersionByGoodsId" resultType="java.lang.Integer">
+        select version from sk_goods_seckill
+        where goods_id = #{goodsId}
+    </select>
+    <update id="reduceStockByVersion">
+        update sk_goods_seckill
+        set stock_count = stock_count - 1,
+            version = version + 1
+        where goods_id = #{goodsId,jdbcType=BIGINT} and version = #{version,jdbcType=INTEGER}
+    </update>
+</mapper>

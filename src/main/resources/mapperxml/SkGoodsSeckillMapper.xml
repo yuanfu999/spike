@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cyf.spike.mapper.SkGoodsSeckillMapper">
+  <resultMap id="BaseResultMap" type="com.cyf.spike.entity.SkGoodsSeckill">
+    <!--@mbg.generated generated on Tue Aug 25 16:16:31 CST 2020.-->
+    <!--@Table sk_goods_seckill-->
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="goods_id" jdbcType="BIGINT" property="goodsId" />
+    <result column="seckill_price" jdbcType="DECIMAL" property="seckillPrice" />
+    <result column="stock_count" jdbcType="INTEGER" property="stockCount" />
+    <result column="start_date" jdbcType="TIMESTAMP" property="startDate" />
+    <result column="end_date" jdbcType="TIMESTAMP" property="endDate" />
+    <result column="version" jdbcType="INTEGER" property="version" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated generated on Tue Aug 25 16:16:31 CST 2020.-->
+    id, goods_id, seckill_price, stock_count, start_date, end_date, version
+  </sql>
+</mapper>

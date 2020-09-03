@@ -1,0 +1,28 @@
+spring:
+  thymeleaf:
+    cache: false
+    enabled: true
+    prefix: classpath:/templates/
+    suffix: .html
+    servlet:
+      content-type: text/html
+    encoding: UTF-8
+    mode: HTML
+  profiles:
+    active: dev
+  mvc:
+    static-path-pattern: /static/**
+  resources:
+    chain:
+      cache: true
+      enabled: true
+      html-application-cache: true
+    add-mappings: true
+    static-locations: classpath:/static/
+
+mybatis:
+  type-aliases-package: com.cyf.spike.mapper
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapperxml/*.xml
+
