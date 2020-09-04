@@ -11,4 +11,6 @@ import com.cyf.spike.vo.GoodsVo;
 public interface SeckillService {
 
     Boolean createSeckillOrder(SkUser user, GoodsVo goodsVo);
+
+    long getSeckillResultByGoodsId(SkUser user, Long gooodsId);
 }

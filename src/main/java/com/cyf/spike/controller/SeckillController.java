@@ -6,6 +6,7 @@ import com.cyf.spike.entity.SkUser;
 import com.cyf.spike.rabbitmq.MQSender;
 import com.cyf.spike.result.CodeMsg;
 import com.cyf.spike.result.Result;
+import com.cyf.spike.service.SeckillService;
 import com.cyf.spike.service.SkGoodsService;
 import com.cyf.spike.service.SkOrderService;
 import com.cyf.spike.vo.GoodsVo;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +44,9 @@ public class SeckillController implements InitializingBean {
     @Autowired
     private MQSender mqSender;
 
+    @Autowired
+    private SeckillService seckillService;
+
     //基于guava令牌桶算法的限流器，一次生成10个令牌
     RateLimiter rateLimiter = RateLimiter.create(10);
 
@@ -53,7 +54,14 @@ public class SeckillController implements InitializingBean {
     Map<Long, Boolean> isHandlerMap = new HashMap<>();
 
 
-
+    /**
+     * 进行秒杀下单
+     * @param model
+     * @param user
+     * @param goodsId
+     * @return
+     * @throws Exception
+     */
     @RequestMapping("doSeckill")
     @ResponseBody
     public Result<Integer> seckill(Model model, SkUser user, @RequestParam("goodsId") Long goodsId) throws Exception {
@@ -66,9 +74,9 @@ public class SeckillController implements InitializingBean {
         }
         model.addAttribute("user", user);
         //内存标记，减少redis访问
-        Boolean isMark = (Boolean) redisTemplate.opsForValue().get(PrefixContant.SECKILL_GOODS_PREFIX + goodsId);
-        //如果redis中标记为true，则说明已经处理过秒杀订单
-        if (isMark){
+        Boolean isOver = (Boolean) redisTemplate.opsForValue().get(PrefixContant.SECKILL_GOODS_PREFIX + goodsId);
+        //如果redis中标记为true，说明该商品已经秒杀结束
+        if (isOver){
             return Result.error(CodeMsg.SECKILL_OVER);
         }
         Long stock = redisTemplate.opsForValue().decrement(PrefixContant.SECKILL_GOODS_PREFIX + goodsId);
@@ -91,6 +99,23 @@ public class SeckillController implements InitializingBean {
         mqSender.sendMessage(seckillMessage);
         //排队中
         return Result.success(0);
+    }
+
+    /**
+     * 获取秒杀结果
+     * @param model
+     * @param user
+     * @param gooodsId
+     * @return
+     */
+    @GetMapping("result")
+    public Result<Long> getSeckillResult(Model model, SkUser user, @RequestParam("goodsId") Long gooodsId){
+        if (user == null){
+            return Result.error(CodeMsg.SERVER_ERROR);
+        }
+        model.addAttribute("user", user);
+        long orderId = seckillService.getSeckillResultByGoodsId(user, gooodsId);
+        return Result.success(orderId);
     }
 
     @Override

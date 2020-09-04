@@ -39,16 +39,30 @@ public class SeckillServiceImpl implements SeckillService {
             //下订单
             return orderService.createOrder(user, goodsVo);
         }else{
-            setMarkStatus(goodsVo.getId());
+            setOverStatus(goodsVo.getId());
             return false;
         }
     }
 
-    public void setMarkStatus(Long goodsId){
-        redisTemplate.opsForValue().set(PrefixContant.SECKILL_GOODS_PREFIX + goodsId, true);
+    @Override
+    public long getSeckillResultByGoodsId(SkUser user, Long gooodsId) {
+        SkOrder order = orderService.getOrderByUserIdAndGoodsId(user.getId(), gooodsId);
+        if (order != null){
+            return order.getOrderId();
+        }else{
+            if (getOverStatus(gooodsId)){
+                return -1;
+            }else{
+                return 0;
+            }
+        }
     }
 
-    public Boolean getMarkStatus(Long goodsId){
-        return null != redisTemplate.opsForValue().get(PrefixContant.SECKILL_GOODS_PREFIX + goodsId);
+    public void setOverStatus(Long goodsId){
+        redisTemplate.opsForValue().set(PrefixContant.SECKILL_GOODS_OVER_PREFIX + goodsId, true);
+    }
+
+    public Boolean getOverStatus(Long goodsId){
+        return null != redisTemplate.opsForValue().get(PrefixContant.SECKILL_GOODS_OVER_PREFIX + goodsId);
     }
 }
